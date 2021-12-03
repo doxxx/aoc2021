@@ -23,14 +23,14 @@ fn read_input() -> Result<Vec<u16>> {
 fn part1(input: &[u16]) {
     let num_increases = count_increases(input.iter().cloned());
 
-    println!("part1: {0}", num_increases);
+    println!("part1: {}", num_increases);
 }
 
 fn part2(input: &[u16]) {
     let window_sums = input.windows(3).map(|w| w[0] + w[1] + w[2]);
     let num_increases = count_increases(window_sums);
 
-    println!("part2: {0}", num_increases);
+    println!("part2: {}", num_increases);
 }
 
 fn count_increases(input: impl IntoIterator<Item=u16>) -> u32 {
