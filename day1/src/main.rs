@@ -15,7 +15,8 @@ fn main() -> Result<()> {
 fn read_input() -> Result<Vec<u16>> {
     let mut input = String::new();
     std::io::stdin().read_to_string(&mut input)?;
-    Ok(input.lines()
+    Ok(input
+        .lines()
         .map(|line| line.parse::<u16>().expect("invalid number"))
         .collect())
 }
@@ -33,7 +34,7 @@ fn part2(input: &[u16]) {
     println!("part2: {}", num_increases);
 }
 
-fn count_increases(input: impl IntoIterator<Item=u16>) -> u32 {
+fn count_increases(input: impl IntoIterator<Item = u16>) -> u32 {
     let mut iter = input.into_iter();
     let mut last_depth = iter.next().unwrap();
     let mut num_increases = 0;

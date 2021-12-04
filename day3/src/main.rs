@@ -14,8 +14,13 @@ fn main() -> Result<()> {
 fn read_input() -> Result<Vec<Vec<u16>>> {
     let mut input = String::new();
     std::io::stdin().read_to_string(&mut input)?;
-    Ok(input.lines()
-        .map(|line| line.bytes().map(|b| (b - b'0') as u16).collect::<Vec<u16>>())
+    Ok(input
+        .lines()
+        .map(|line| {
+            line.bytes()
+                .map(|b| (b - b'0') as u16)
+                .collect::<Vec<u16>>()
+        })
         .collect())
 }
 
@@ -31,54 +36,52 @@ fn part1(input: &[Vec<u16>]) {
 
 fn part2(input: &[Vec<u16>]) {
     let mut oxygen_input = input.to_owned();
-    
+
     for bit in 0..NUM_BITS {
         if oxygen_input.len() == 1 {
             break;
         }
-        
+
         let [count_0, count_1] = count_bits(&oxygen_input, bit);
         let most_common = {
-            if count_1 > count_0 { 
+            if count_1 > count_0 {
                 1
-            }
-            else if count_0 > count_1 {
+            } else if count_0 > count_1 {
                 0
-            }
-            else {
+            } else {
                 1
             }
         };
-        oxygen_input = oxygen_input.into_iter()
-                                   .filter(|bits| bits[bit] == most_common)
-                                   .collect();
+        oxygen_input = oxygen_input
+            .into_iter()
+            .filter(|bits| bits[bit] == most_common)
+            .collect();
     }
 
     let oxygen = bits_to_int(oxygen_input.first().unwrap());
     println!("part2: oxygen = {}", oxygen);
 
     let mut co2_input = input.to_owned();
-    
+
     for bit in 0..NUM_BITS {
         if co2_input.len() == 1 {
             break;
         }
-        
+
         let [count_0, count_1] = count_bits(&co2_input, bit);
         let least_common = {
-            if count_1 < count_0 { 
+            if count_1 < count_0 {
                 1
-            }
-            else if count_0 < count_1 {
+            } else if count_0 < count_1 {
                 0
-            }
-            else {
+            } else {
                 0
             }
         };
-        co2_input = co2_input.into_iter()
-                                   .filter(|bits| bits[bit] == least_common)
-                                   .collect();
+        co2_input = co2_input
+            .into_iter()
+            .filter(|bits| bits[bit] == least_common)
+            .collect();
     }
 
     let co2 = bits_to_int(co2_input.first().unwrap());
@@ -104,7 +107,7 @@ fn calc_gamma(input: &[Vec<u16>]) -> u16 {
 
 fn count_bits(input: &[Vec<u16>], pos: usize) -> [u16; 2] {
     let mut counts: [u16; 2] = [0; 2];
-    
+
     for num in input {
         counts[num[pos] as usize] += 1;
     }
