@@ -1,4 +1,5 @@
 use shared::Grid;
+use std::collections::vec_deque::*;
 use std::fmt;
 use std::io::prelude::*;
 
@@ -7,8 +8,9 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 fn main() -> Result<()> {
     let input = read_input()?;
 
-    part1(input);
-    // part2(&input);
+    part1(input.clone());
+    println!();
+    part2(input);
 
     Ok(())
 }
@@ -47,7 +49,10 @@ fn read_input() -> Result<Bingo> {
         boards.push(Board::new(rows));
     }
 
-    Ok(Bingo { boards, numbers })
+    Ok(Bingo {
+        boards,
+        numbers: VecDeque::from(numbers),
+    })
 }
 
 #[derive(Clone, Default)]
@@ -57,7 +62,9 @@ struct BoardSlot {
 }
 
 impl BoardSlot {
-    fn new(num: u32) -> Self { Self { num, marked: false } }
+    fn new(num: u32) -> Self {
+        Self { num, marked: false }
+    }
 }
 
 impl fmt::Display for BoardSlot {
@@ -136,33 +143,104 @@ impl BoardMarking for Board {
     }
 }
 
+#[derive(Clone)]
 struct Bingo {
     boards: Vec<Board>,
-    numbers: Vec<u32>,
+    numbers: VecDeque<u32>,
+}
+
+enum AdvanceResult {
+    Winner(Board, u32),
+    NoWinner,
+    NoMoreNumbers,
 }
 
 impl Bingo {
-    fn find_winning_board(&mut self) -> (Board, u32) {
-        for &num in self.numbers.iter() {
-            for board in self.boards.iter_mut() {
-                board.mark_num(num);
-                if board.is_winner() {
-                    return (board.clone(), num);
-                }
+    fn advance(&mut self) -> AdvanceResult {
+        if let Some(num) = self.numbers.pop_front() {
+            self.mark_boards(num);
+
+            let winners = self.remove_winners();
+            if let Some(winner) = winners.into_iter().nth(0) {
+                return AdvanceResult::Winner(winner, num);
+            }
+
+            AdvanceResult::NoWinner
+        } else {
+            AdvanceResult::NoMoreNumbers
+        }
+    }
+
+    fn mark_boards(&mut self, num: u32) {
+        for board in self.boards.iter_mut() {
+            board.mark_num(num);
+        }
+    }
+
+    fn remove_winners(&mut self) -> Vec<Board> {
+        let mut winners = Vec::new();
+
+        while self.boards.len() > 0 {
+            let winner = self
+                .boards
+                .iter()
+                .enumerate()
+                .find(|(_, b)| b.is_winner())
+                .map(|(i, _)| i);
+
+            if let Some(winner) = winner.map(|i| self.boards.remove(i)) {
+                winners.push(winner);
+            } else {
+                break;
             }
         }
 
-        panic!()
+        winners
+    }
+
+    fn find_first_winning_board(&mut self) -> (Board, u32) {
+        loop {
+            match self.advance() {
+                AdvanceResult::Winner(b, num) => return (b, num),
+                AdvanceResult::NoWinner => {}
+                AdvanceResult::NoMoreNumbers => panic!("no winning board!"),
+            }
+        }
+    }
+
+    fn find_last_winning_board(&mut self) -> (Board, u32) {
+        let mut last_winner = None;
+
+        loop {
+            match self.advance() {
+                AdvanceResult::Winner(b, num) => {
+                    last_winner = Some((b, num));
+                }
+                AdvanceResult::NoWinner => {}
+                AdvanceResult::NoMoreNumbers => return last_winner.expect("no winning board!"),
+            }
+        }
     }
 }
 
 fn part1(mut bingo: Bingo) {
-    let (board, num) = bingo.find_winning_board();
+    let (board, winning_num) = bingo.find_first_winning_board();
 
-    println!("part1: winner num = {}", num);
-    println!("part1: winner board:\n{}", board);
+    println!("part1: winning num = {}", winning_num);
+    println!("part1: winning board:\n{}", board);
+
+    let result = board.sum_unmarked() * winning_num;
+
+    println!("part1: result = {}", result);
+}
+
+fn part2(mut bingo: Bingo) {
+    let (board, num) = bingo.find_last_winning_board();
+
+    println!("part2: winning num = {}", num);
+    println!("part2: winning board:\n{}", board);
 
     let result = board.sum_unmarked() * num;
 
-    println!("part1: result = {}", result);
+    println!("part2: result = {}", result);
 }
