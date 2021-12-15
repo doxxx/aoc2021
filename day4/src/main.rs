@@ -83,7 +83,7 @@ struct Board(Grid<BoardSlot>);
 
 impl Board {
     pub fn new(rows: Vec<Vec<BoardSlot>>) -> Board {
-        Self(Grid::new_with_rows(5, rows))
+        Self(Grid::new_square_with_rows(5, rows))
     }
 }
 

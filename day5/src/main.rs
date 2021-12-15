@@ -132,7 +132,7 @@ struct OceanFloor(Grid<isize>);
 
 impl OceanFloor {
     fn new(size: usize) -> OceanFloor {
-        OceanFloor(Grid::new(size, 0))
+        OceanFloor(Grid::new_square(size, 0))
     }
 
     fn count_overlaps(&self, min_overlap: isize) -> usize {

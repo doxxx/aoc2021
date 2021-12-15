@@ -2,24 +2,35 @@ use std::convert::AsMut;
 
 #[derive(Clone)]
 pub struct Grid<T> {
-    pub size: usize,
+    width: usize,
+    height: usize,
     pub cells: Vec<T>,
 }
 
 impl<T: Clone> Grid<T> {
-    pub fn new(size: usize, initial_value: T) -> Grid<T> {
+    pub fn new(width: usize, height: usize, initial_value: T) -> Grid<T> {
         Grid {
-            size,
+            width,
+            height,
+            cells: vec![initial_value; width * height],
+        }
+    }
+
+    pub fn new_square(size: usize, initial_value: T) -> Grid<T> {
+        Grid {
+            width: size,
+            height: size,
             cells: vec![initial_value; size * size],
         }
     }
 
-    pub fn new_with_def_fn<F>(size: usize, cell_value_fn: F) -> Grid<T>
+    pub fn new_square_with_value_fn<F>(size: usize, cell_value_fn: F) -> Grid<T>
     where
         F: Fn(usize, usize) -> T,
     {
         let mut g = Grid {
-            size,
+            width: size,
+            height: size,
             cells: Vec::with_capacity(size * size),
         };
         for y in 0..size {
@@ -30,25 +41,46 @@ impl<T: Clone> Grid<T> {
         g
     }
 
-    pub fn new_with_rows(size: usize, rows: Vec<Vec<T>>) -> Grid<T> {
+    pub fn new_square_with_rows(size: usize, rows: Vec<Vec<T>>) -> Grid<T> {
         let mut cells = Vec::new();
         for mut row in rows {
             cells.append(&mut row);
         }
-        Grid { size, cells }
+        Grid {
+            width: size,
+            height: size,
+            cells,
+        }
     }
 
-    pub fn size(&self) -> usize {
-        self.size
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
     }
 
     pub fn get(&self, x: usize, y: usize) -> &T {
-        &self.cells[self.row_start(y) + x]
+        &self.cells[self.cell_offset(x, y)]
     }
 
     pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
-        let start = self.row_start(y);
-        &mut self.cells[start + x]
+        let offset = self.cell_offset(x, y);
+        &mut self.cells[offset]
+    }
+
+    pub fn try_get(&self, x: isize, y: isize) -> Option<&T> {
+        if x < 0 || y < 0 { None }
+        else {
+            let x = x as usize;
+            let y = y as usize;
+            if x >= self.width || y >= self.height {
+                None
+            } else {
+                Some(self.get(x, y))
+            }
+        }
     }
 
     pub fn iter(&self) -> GridIter<T> {
@@ -66,20 +98,21 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn get_row(&self, y: usize) -> Vec<T> {
-        let start = self.row_start(y);
-        self.cells[start..(start + self.size)].to_vec()
+        let start = self.cell_offset(0, y);
+        let end = start + self.width;
+        self.cells[start..end].to_vec()
     }
 
     pub fn get_col(&self, x: usize) -> Vec<&T> {
         let mut col = Vec::new();
-        for y in 0..self.size {
+        for y in 0..self.height {
             col.push(&self[(x, y)]);
         }
         col
     }
 
-    fn row_start(&self, y: usize) -> usize {
-        y * self.size
+    fn cell_offset(&self, x: usize, y: usize) -> usize {
+        y * self.width + x
     }
 }
 
@@ -93,10 +126,10 @@ impl<'a, T: Clone> Iterator for GridIter<'a, T> {
     type Item = (usize, usize, &'a T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.y < self.grid.size {
+        if self.y < self.grid.height {
             let (x, y, val) = (self.x, self.y, self.grid.get(self.x, self.y));
             self.x += 1;
-            if self.x == self.grid.size {
+            if self.x == self.grid.width {
                 self.x = 0;
                 self.y += 1;
             }
