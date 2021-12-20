@@ -8,12 +8,12 @@
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/target/debug/day7",
-            "args": [],
+            "program": "${workspaceFolder}/target/debug/day11",
+            "args": [ "${workspaceFolder}/day11/small_test.txt" ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
-            "console": "externalTerminal"
+            "console": "externalTerminal",
         }
     ]
 }

@@ -71,14 +71,29 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn try_get(&self, x: isize, y: isize) -> Option<&T> {
-        if x < 0 || y < 0 { None }
-        else {
+        if x < 0 || y < 0 {
+            None
+        } else {
             let x = x as usize;
             let y = y as usize;
             if x >= self.width || y >= self.height {
                 None
             } else {
                 Some(self.get(x, y))
+            }
+        }
+    }
+
+    pub fn try_get_mut(&mut self, x: isize, y: isize) -> Option<&mut T> {
+        if x < 0 || y < 0 {
+            None
+        } else {
+            let x = x as usize;
+            let y = y as usize;
+            if x >= self.width || y >= self.height {
+                None
+            } else {
+                Some(self.get_mut(x, y))
             }
         }
     }
