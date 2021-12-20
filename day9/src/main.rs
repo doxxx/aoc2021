@@ -53,7 +53,12 @@ fn part1(input: &Grid<u8>) {
 }
 
 fn discover_basin_size(g: &Grid<u8>, counted: &mut Grid<bool>, x: usize, y: usize) -> usize {
-    counted[(x, y)] = true;
+    let mut count = 0;
+
+    if !counted[(x, y)] {
+        count += 1;
+        counted[(x, y)] = true;
+    }
 
     let center = g[(x, y)];
     let x = x as isize;
@@ -69,18 +74,15 @@ fn discover_basin_size(g: &Grid<u8>, counted: &mut Grid<bool>, x: usize, y: usiz
         .into_iter()
         .flatten()
         .map(|(x, y, v)| (x as usize, y as usize, v))
-        .filter(|&(x, y, v)| !counted[(x, y)] && v < 9 && v > center)
+        .filter(|&(_, _, v)| v < 9 && v > center)
         .collect();
 
-    for &(x, y, _) in surrounding.iter() {
-        counted[(x, y)] = true;
-    }
+    count += surrounding
+        .into_iter()
+        .map(|(x, y, _)| discover_basin_size(g, counted, x as usize, y as usize))
+        .sum::<usize>();
 
-    1usize
-        + surrounding
-            .into_iter()
-            .map(|(x, y, _)| discover_basin_size(g, counted, x as usize, y as usize))
-            .sum::<usize>()
+    count
 }
 
 fn part2(input: &Grid<u8>) {
