@@ -96,7 +96,7 @@ fn discover_path(
 
     if current_cave.name == "end" {
         paths.push(current_path.clone());
-        println!("{}", current_path.join(","));
+        // println!("{}", current_path.join(","));
     } else {
         for connection in current_cave.connections.iter() {
             let connected_cave = cs
@@ -142,14 +142,14 @@ fn discover_path2(
 
     if current_cave.name == "end" {
         paths.push(current_path.clone());
-        println!("{}", current_path.join(","));
+        // println!("{}", current_path.join(","));
     } else {
         for connection in current_cave.connections.iter() {
             let connected_cave = cs
                 .caves
                 .get(connection)
                 .expect(&format!("no cave called {}", connection));
-            discover_path(cs, connected_cave, paths, current_path);
+            discover_path2(cs, connected_cave, paths, current_path);
         }
     }
 

@@ -6,10 +6,10 @@
     "configurations": [
         {
             "name": "(Windows) Launch",
-            "type": "cppvsdbg",
+            "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/target/debug/day11",
-            "args": [ "${workspaceFolder}/day11/small_test.txt" ],
+            "program": "${workspaceFolder}/target/debug/day12",
+            "args": [ "${workspaceFolder}/day12/small-test.txt" ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
